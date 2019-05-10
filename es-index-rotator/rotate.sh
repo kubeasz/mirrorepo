@@ -18,7 +18,7 @@ if [[ "$#" -gt 0 && $1 =~ ^[1-9][0-9]{0,2}$ ]];then
     max_days_of_log=$1
 fi
 
-#curl elasticsearch-logging:9200/_cat/indices? > /tmp/indices
+curl elasticsearch-logging:9200/_cat/indices? > /tmp/indices
 
 curr_days_of_log=$(cat /tmp/indices|grep logstash|wc -l)
 
@@ -34,7 +34,7 @@ first_day=$(date -d "$max_days_of_log days ago" +'%Y.%m.%d')
 rotate=$(cat /tmp/indices|grep logstash|cut -d' ' -f3|cut -d'-' -f2|sort|sed -n "1,/$first_day/"p)
 
 for day in $rotate;do
-    echo "curl -X DELETE elasticsearch-logging:9200/logstash-$day"
+    curl -X DELETE elasticsearch-logging:9200/logstash-$day
 done
 
 echo "[INFO] Success to rotate the ES indices!"
