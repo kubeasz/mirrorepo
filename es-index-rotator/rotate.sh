@@ -11,14 +11,17 @@ set -o nounset
 set -o errexit
 set -o xtrace
 
-# max days of logs to keep, default is to keep 7 days
+# max days of logs to keep, default=7
 max_days_of_log=7
 
 if [[ "$#" -gt 0 && $1 =~ ^[1-9][0-9]{0,2}$ ]];then
     max_days_of_log=$1
 fi
 
-curl elasticsearch-logging:9200/_cat/indices? > /tmp/indices
+echo -e "\n[INFO] rotate job starts, try to keep $max_days_of_log days of logs."
+
+curl elasticsearch-logging:9200/_cat/indices? > /tmp/indices || \
+{ echo "[ERROR] Can not connect to elastic!"; exit 1; }
 
 curr_days_of_log=$(cat /tmp/indices|grep logstash|wc -l)
 
@@ -37,5 +40,5 @@ for day in $rotate;do
     curl -X DELETE elasticsearch-logging:9200/logstash-$day
 done
 
-echo "[INFO] Success to rotate the ES indices!"
-exit 0	
+echo -e "\n[INFO] Success to rotate the ES indices!"
+exit 0
